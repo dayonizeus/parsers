@@ -1,6 +1,6 @@
 """
 Запуск теста с отчетом
-pytest --cov=work_parser --cov-report=html
+pytest --cov=w_parser --cov-report=html
 """
 
 from w_parser.w_parser import *
@@ -148,15 +148,14 @@ class TestHhParser():
         # значение свойства _url на False
         assert test_object._url is False
 
-    def test_get_hh_data():
+    def test_get_hh_data(self):
         # Тестирование в реальных условиях
         link = ('https://hh.ru/search/vacancy?clusters=true&enable_snippet' +
                 's=true&text=%D0%B4%D0%B2%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&L_' +
                 'save_area=true&area=1002&from=cluster_area&showClusters=true')
         # Получение списка кортежей с вакансиями
-        # result_list = HhParser().set_url(link).get_data()
         test_object = HhParser()
         test_object.set_url(link)
-        result_list = to.get_data()
+        result_list = test_object.get_data()
         # Если парсер отработал - то длинна списка должна быть более 0
         assert len(result_list) > 0
