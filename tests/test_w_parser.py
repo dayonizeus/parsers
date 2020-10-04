@@ -5,12 +5,13 @@ pytest --cov=w_parser --cov-report=html
 
 from w_parser.w_parser import *
 
-test_object = HhParser()
+test_object_hh = HhParser()
+test_object_work_ua = WorkUaParser()
 
 
 class TestParser():
 
-    def test_checklist(self):
+    def test_checklist(self, test_object=test_object_hh):
         # Установка тестового значения для свойства _ads_list
         test_object._ads_list = [
             ('работа', 'рога и копыта', 'link', '1$'),
@@ -36,7 +37,7 @@ class TestParser():
         # _checklist() должен отклонить запись не уникального кортежа
         assert test_object._ads_list == test_expected
 
-    def test_set_ads(self):
+    def test_set_ads(self, test_object=test_object_hh):
         # Установка тестового значения для свойства _ads_list
         test_object._ads_list = []
         # Попробуем добавить объект не являющийся списком
@@ -67,7 +68,7 @@ class TestParser():
 
 class TestHhParser():
 
-    def test_set_hh_url(self):
+    def test_set_hh_url(self, test_object=test_object_hh):
         # Тестовое значение для корректной ссылки
         correct_url = ('https://hh.ru/search/vacancy?area=123&fromSearchLin' +
                        'e=true&st=searchVacancy&text=')
@@ -87,7 +88,7 @@ class TestHhParser():
         формате ссылки'''
         assert test_object._url is None
 
-    def test_get_hh_details(self):
+    def test_get_hh_details(self, test_object=test_object_hh):
         # Открытие тестового html-файла
         with open('tests/test_files/hh.html', encoding='utf-8') as f:
             test_page_hh = f.read()
@@ -123,7 +124,7 @@ class TestHhParser():
         должно быть "не указана"'''
         assert test_object._ads_list[1][3] == 'не указана'
 
-    def test_hh_pagination(self):
+    def test_hh_pagination(self, test_object=test_object_hh):
         # Открытие тестового html-файла
         with open('tests/test_files/hh.html', encoding='utf-8') as f:
             test_page_hh = f.read()
@@ -148,13 +149,105 @@ class TestHhParser():
         # значение свойства _url на False
         assert test_object._url is False
 
-    def test_get_hh_data(self):
+    def test_get_hh_data(self, test_object=test_object_hh):
         # Тестирование в реальных условиях
         link = ('https://hh.ru/search/vacancy?clusters=true&enable_snippet' +
                 's=true&text=%D0%B4%D0%B2%D0%BE%D1%80%D0%BD%D0%B8%D0%BA&L_' +
                 'save_area=true&area=1002&from=cluster_area&showClusters=true')
         # Получение списка кортежей с вакансиями
         test_object = HhParser()
+        test_object.set_url(link)
+        result_list = test_object.get_data()
+        # Если парсер отработал - то длинна списка должна быть более 0
+        assert len(result_list) > 0
+
+
+class TestWorkUaParser():
+
+    def test_set_work_ua_url(self, test_object=test_object_work_ua):
+        # Тестовое значение для корректной ссылки
+        correct_url = (
+            'https://www.work.ua/ru/jobs-legal/?advs=1&employment=76')
+        # Тестовое значение для некорректной ссылки
+        incorrect_url = 'https://rabota.ru'
+        # Установка стартового значения свойста _url
+        test_object._url = None
+        # Выполнение тестируемого метода
+        test_object.set_url(correct_url)
+        # _set_url должен устанавливать корректное значение свойства _url
+        assert test_object._url == correct_url
+        # Установка стартового значения свойства _url
+        test_object._url = None
+        # Выполнение тестируемого метода
+        test_object.set_url(incorrect_url)
+        '''_set_url должен отвергать установку свойства _url при неверном
+        формате ссылки'''
+        assert test_object._url is None
+
+    def test_get_work_ua_details(self, test_object=test_object_work_ua):
+        # Открытие тестового html-файла
+        with open('tests/test_files/work_ua.html', encoding='utf-8') as f:
+            test_page_hh = f.read()
+        # Присвоение тестового значения свойству _soup тестового объекта
+        test_object._soup = BeautifulSoup(test_page_hh, 'lxml')
+        # Присвоение тестового значения свойству _ads_list тестового объекта
+        test_object._ads_list = []
+        # Выполнение тестируемого метода
+        test_object._get_details()
+        # Тестируемый метод должен изменять свойство _ads_list тестируемого
+        # объекта
+        assert test_object._ads_list != []
+        # В результирующем списке должно быть 13 записей. Правильность данного
+        # утверждения можно проверить вручную - файл 'test_page_hh.html'
+        assert len(test_object._ads_list) == 13
+        # Результирующий список должен содержать кортежи
+        for ad in test_object._ads_list:
+            assert type(ad) is tuple
+        '''Результирующие кортежи должны иметь следующий вид:
+        ("Заголовок объявления",
+        "Наименование работодателя",
+        "ссылка на страницу объявления",
+        "Размер з/п (если есть)")'''
+        # Ожидаемый результат первого кортежа в списке
+        expected_tuple = (
+            'Специалист по работе с задолженностью',
+            'Hired!',
+            'https://www.work.ua/ru/jobs/3919529/',
+            '30 000 грн · ставка + бонусы'
+        )
+        assert test_object._ads_list[2] == expected_tuple
+        '''Если з/п не указана, то четвертое значение кортежа
+        должно быть "не указана"'''
+        assert test_object._ads_list[3][3] == 'не указана'
+
+    def test_work_ua_pagination(self, test_object=test_object_work_ua):
+        # Открытие тестового html-файла
+        with open('tests/test_files/work_ua.html', encoding='utf-8') as f:
+            test_page_hh = f.read()
+        # Присвоение тестового значения свойству _soup тестового объекта
+        test_object._soup = BeautifulSoup(test_page_hh, 'lxml')
+        # Установка стартового значения свойства _url
+        test_object._url = 'https://www.work.ua/ru/jobs-legal'
+        # Выполнение тестируемого метода
+        test_object._pagination()
+        # Ожидаемое значение свойства _url
+        expected_link = ('https://www.work.ua/ru/jobs-legal/?advs=1' +
+                         '&employment=76&_pjax=%23pjax&page=2')
+        # Тестируемый метод должен изенять свойство _url на ожидаемое
+        assert test_object._url == expected_link
+        # Присвоение тестового значения свойству _soup тестового объекта
+        test_object._soup = BeautifulSoup('<div></div>', 'lxml')
+        # Выполнение тестируемого метода
+        test_object._pagination()
+        # При отсутствии на странице ссылки на следующую метод должен изменить
+        # значение свойства _url на False
+        assert test_object._url is False
+
+    def test_get_work_ua_data(self):
+        # Тестирование в реальных условиях
+        link = ('https://www.work.ua/ru/jobs-legal/?advs=1&employment=76')
+        # Получение списка кортежей с вакансиями
+        test_object = WorkUaParser()
         test_object.set_url(link)
         result_list = test_object.get_data()
         # Если парсер отработал - то длинна списка должна быть более 0
