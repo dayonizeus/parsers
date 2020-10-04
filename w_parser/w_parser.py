@@ -156,3 +156,58 @@ class HhParser(Parser):
         # Если таковой нет, то указываем это
         except AttributeError:
             self._url = False
+
+
+class WorkUaParser(Parser):
+    '''
+    Класс определяющий методы для парсера сайта work.ua
+
+    Имеет единственный публичный метод set_url(), что принимает от
+    пользователя начальное значение url-адреса с которого начинается
+    работа парсера
+    '''
+
+    def set_url(self, url_str):
+        ''' Устанавливает стартовую ссылку для парсинга '''
+        # Если передаваемое значение является ссылкой на work.ua
+        if url_str[:19] == 'https://www.work.ua':
+            # Записываем его в соответствующее свойство объекта
+            self._url = url_str
+
+    def _get_details(self):
+        '''Добавляет к списку с объявлениями новые кортежи'''
+        # Находит все контейнеры с объявлениями в текущем массиве данных
+        ads = self._soup.find_all('div', class_='card-hover')
+        # Находит интересующие нас данные в каждом контейнере
+        for ad in ads:
+            # Заголовок объявления
+            title = ad.find('a').text
+            # Ссылка на страницу объявления
+            link = f"https://www.work.ua/ru{ad.find('a').get('href')}"
+            # Наименование работодателя
+            employeer = ad.find(
+                'div', class_='add-top-xs').find('span').text.strip()
+            # Размер заработной платы
+            if ad.find('div').get('class') is None:
+                salary = ad.find('div').text.strip()
+                salary = salary.replace('\u202f', ' ')
+                salary = salary.replace('\xa0', ' ')
+            else:
+                salary = 'не указана'
+            # Запись полученых данных в кортеж
+            ad_data = (title, employeer, link, salary)
+            # Проверка записи на уникальность и запись в результирующий список
+            self._checklist(ad_data)
+
+    def _pagination(self):
+        '''Изменяет ссылку на следующую страницу. Изменяет её на False, если
+        следующей страницы нет'''
+        # Получение ссылки на следующую странцицу
+        try:
+            self._url = "https://www.work.ua" + (
+                self._soup.find('ul', class_='pagination')
+                .find('span', class_='glyphicon-chevron-right')
+                .find_parent('li').find('a').get('href')
+            )
+        except AttributeError:
+            self._url = False
