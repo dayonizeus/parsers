@@ -101,9 +101,9 @@ class TestHhParser():
         # Тестируемый метод должен изменять свойство _ads_list тестируемого
         # объекта
         assert test_object._ads_list != []
-        # В результирующем списке должно быть 28 записей. Правильность данного
-        # утверждения можно проверить вручную - файл 'test_page_hh.html'
-        assert len(test_object._ads_list) == 28
+        # В результирующем списке должно быть 48 записей. Правильность данного
+        # утверждения можно проверить вручную - файл 'test_files_hh.html'
+        assert len(test_object._ads_list) == 48
         # Результирующий список должен содержать кортежи
         for ad in test_object._ads_list:
             assert type(ad) is tuple
@@ -114,15 +114,15 @@ class TestHhParser():
         "Размер з/п (если есть)")'''
         # Ожидаемый результат первого кортежа в списке
         expected_tuple = (
-            'Web-программист (стажер)',
-            'Dial',
-            'https://hh.ru/vacancy/39460641',
-            'от 20000 руб.'
+            'Менеджер по продажам',
+            'ООО ФИНЭКСПРЕСС',
+            'https://hh.ru/vacancy/36649951',
+            '110000-350000 руб.'
         )
         assert test_object._ads_list[0] == expected_tuple
         '''Если з/п не указана, то четвертое значение кортежа
         должно быть "не указана"'''
-        assert test_object._ads_list[1][3] == 'не указана'
+        assert test_object._ads_list[13][3] == 'не указана'
 
     def test_hh_pagination(self, test_object=test_object_hh):
         # Открытие тестового html-файла
@@ -135,12 +135,14 @@ class TestHhParser():
         # Выполнение тестируемого метода
         test_object._pagination()
         # Ожидаемое значение свойства _url
-        expected_link = ('https://hh.ru/search/vacancy?L_is_autosearch=fals' +
-                         'e&clusters=true&enable_snippets=true&page=1')
+        expected_link = ('https://hh.ru/search/vacancy?clusters=true&enable_' +
+                         'snippets=true&search_field=name&search_period=1&te' +
+                         'xt=%D0%BC%D0%B5%D0%BD%D0%B5%D0%B4%D0%B6%D0%B5%D1%8' +
+                         '0&page=1')
         # Тестируемый метод должен изенять свойство _url на ожидаемое (срез
         # сделан так как в реальной ситуации ссылка на сайте обрезана -
         # нет первой части url`а ('https://hh.ru')
-        assert test_object._url[13:] == expected_link
+        assert test_object._url == expected_link
         # Присвоение тестового значения свойству _soup тестового объекта
         test_object._soup = BeautifulSoup('<div></div>', 'lxml')
         # Выполнение тестируемого метода
