@@ -30,3 +30,6 @@ pip install w-parser
 **hh.set_url(url)**<br>
 *получение списка с искомыми значениями*<br>
 **hh_list = hh.get_data()**<br>
+
+## Обратная связь
+Ваши пожелания и предложения можете направлять по адресу dayonizeus@gmail.com
