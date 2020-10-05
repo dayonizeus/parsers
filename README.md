@@ -32,6 +32,7 @@ pip install w-parser
 **hh_list = hh.get_data()**<br>
 
 ***Короткая запись также работает***
+
 **hh_list = w_parser.HhParser().set_url(url).get_data()**<br>
 
 ## Обратная связь
