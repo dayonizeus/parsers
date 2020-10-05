@@ -101,6 +101,8 @@ class Parser():
         elif not cond_contents:
             print('Устанавливаемый список должен состоять из кортежей')
 
+        return self
+
 
 class HhParser(Parser):
     '''
@@ -116,6 +118,8 @@ class HhParser(Parser):
         if url_str[:13] == 'https://hh.ru':
             # Записываем его в соответствующее свойство объекта
             self._url = url_str
+
+            return self
 
     def _get_details(self):
         '''Добавляет к списку с объявлениями новые кортежи'''
@@ -173,6 +177,8 @@ class WorkUaParser(Parser):
         if url_str[:19] == 'https://www.work.ua':
             # Записываем его в соответствующее свойство объекта
             self._url = url_str
+
+            return self
 
     def _get_details(self):
         '''Добавляет к списку с объявлениями новые кортежи'''
