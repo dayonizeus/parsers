@@ -3,6 +3,9 @@ name = "w_parser"
 version = "0.1.0"
 description = "Parser for job search sites"
 authors = ["dayonizeus <dayonizeus@gmail.com>"]
+license = "MIT"
+homepage = "https://github.com/dayonizeus/parsers"
+documentation = "https://github.com/dayonizeus/parsers/blob/master/README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
