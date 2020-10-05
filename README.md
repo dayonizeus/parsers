@@ -14,6 +14,7 @@ pip install w-parser
 ## Использование
 
 *импорт*
+
 **from w_parser import w_parser**
 *инициализация объекта*
 **hh = w_parser.HhParser()**
