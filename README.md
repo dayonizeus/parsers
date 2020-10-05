@@ -24,7 +24,7 @@ pip install w-parser
 **from w_parser import w_parser**<br>
 *инициализация объекта*<br>
 **hh = w_parser.HhParser()**<br>
-*образец ссылки*
+*образец ссылки*<br>
 **url** = 'https://hh.ru/search/vacancy?clusters=true&enable_snippets=true&no_magic=true&search_period=1&text=%D1%81%D0%BF%D0%B5%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D1%81%D1%82+%D0%BF%D0%BE+%D1%82%D0%B5%D1%81%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8E&L_save_area=true&area=2&from=cluster_area&showClusters=true'<br>
 *установка ссылки для парсинга*<br>
 **hh.set_url(url)**<br>
