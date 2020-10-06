@@ -7,6 +7,7 @@ from w_parser.w_parser import *
 
 test_object_hh = HhParser()
 test_object_work_ua = WorkUaParser()
+test_object_rabota_ua = RabotaUaParser()
 
 
 class TestParser():
@@ -189,9 +190,9 @@ class TestWorkUaParser():
     def test_get_work_ua_details(self, test_object=test_object_work_ua):
         # Открытие тестового html-файла
         with open('tests/test_files/work_ua.html', encoding='utf-8') as f:
-            test_page_hh = f.read()
+            test_page_work_ua = f.read()
         # Присвоение тестового значения свойству _soup тестового объекта
-        test_object._soup = BeautifulSoup(test_page_hh, 'lxml')
+        test_object._soup = BeautifulSoup(test_page_work_ua, 'lxml')
         # Присвоение тестового значения свойству _ads_list тестового объекта
         test_object._ads_list = []
         # Выполнение тестируемого метода
@@ -225,9 +226,9 @@ class TestWorkUaParser():
     def test_work_ua_pagination(self, test_object=test_object_work_ua):
         # Открытие тестового html-файла
         with open('tests/test_files/work_ua.html', encoding='utf-8') as f:
-            test_page_hh = f.read()
+            test_page_work_ua = f.read()
         # Присвоение тестового значения свойству _soup тестового объекта
-        test_object._soup = BeautifulSoup(test_page_hh, 'lxml')
+        test_object._soup = BeautifulSoup(test_page_work_ua, 'lxml')
         # Установка стартового значения свойства _url
         test_object._url = 'https://www.work.ua/ru/jobs-legal'
         # Выполнение тестируемого метода
@@ -252,5 +253,99 @@ class TestWorkUaParser():
         test_object = WorkUaParser()
         test_object.set_url(link)
         result_list = test_object.get_data()
+        # Если парсер отработал - то длинна списка должна быть более 0
+        assert len(result_list) > 0
+
+
+class TestRabotaUaParser():
+
+    def test_set_rabota_ua_url(self, test_object=test_object_rabota_ua):
+        # Тестовое значение для корректной ссылки
+        correct_url = ('https://rabota.ua/zapros/%d0%b2%d0%be%d0%b4%d0%b8%d1' +
+                       '%82%d0%b5%d0%bb%d1%8c/%d1%83%d0%ba%d1%80%d0%b0%d0%b8' +
+                       '%d0%bd%d0%b0')
+        # Тестовое значение для некорректной ссылки
+        incorrect_url = 'https://rabota.ru'
+        # Установка стартового значения свойста _url
+        test_object._url = None
+        # Выполнение тестируемого метода
+        test_object.set_url(correct_url)
+        # _set_url должен устанавливать корректное значение свойства _url
+        assert test_object._url == correct_url
+        # Установка стартового значения свойства _url
+        test_object._url = None
+        # Выполнение тестируемого метода
+        test_object.set_url(incorrect_url)
+        '''_set_url должен отвергать установку свойства _url при неверном
+        формате ссылки'''
+        assert test_object._url is None
+
+    def test_get_work_ua_details(self, test_object=test_object_rabota_ua):
+        # Открытие тестового html-файла
+        with open('tests/test_files/rabota_ua.html', encoding='utf-8') as f:
+            test_page_rabota_ua = f.read()
+        # Присвоение тестового значения свойству _soup тестового объекта
+        test_object._soup = BeautifulSoup(test_page_rabota_ua, 'lxml')
+        # Присвоение тестового значения свойству _ads_list тестового объекта
+        test_object._ads_list = []
+        # Выполнение тестируемого метода
+        test_object._get_details()
+        # Тестируемый метод должен изменять свойство _ads_list тестируемого
+        # объекта
+        assert test_object._ads_list != []
+        # В результирующем списке должно быть 20 записей. Правильность данного
+        # утверждения можно проверить вручную - файл 'test_page_hh.html'
+        assert len(test_object._ads_list) == 20
+        # Результирующий список должен содержать кортежи
+        for ad in test_object._ads_list:
+            assert type(ad) is tuple
+        '''Результирующие кортежи должны иметь следующий вид:
+        ("Заголовок объявления",
+        "Наименование работодателя",
+        "ссылка на страницу объявления",
+        "Размер з/п (если есть)")'''
+        # Ожидаемый результат первого кортежа в списке
+        expected_tuple = (
+            'Водитель на наше авто (Uber, Uklon, Bolt, Позняки)',
+            'ЛКТ',
+            'https://rabota.ua/company6182579/vacancy7858961',
+            '18000 грн'
+        )
+        assert test_object._ads_list[0] == expected_tuple
+        '''Если з/п не указана, то четвертое значение кортежа
+        должно быть "не указана"'''
+        assert test_object._ads_list[1][3] == 'не указана'
+
+    def test_rabota_ua_pagination(self, test_object=test_object_rabota_ua):
+        # Открытие тестового html-файла
+        with open('tests/test_files/rabota_ua.html', encoding='utf-8') as f:
+            test_page_rabota_ua = f.read()
+        # Присвоение тестового значения свойству _soup тестового объекта
+        test_object._soup = BeautifulSoup(test_page_rabota_ua, 'lxml')
+        # Установка стартового значения свойства _url
+        test_object._url = 'https://rabota.ua/'
+        # Выполнение тестируемого метода
+        test_object._pagination()
+        # Ожидаемое значение свойства _url
+        expected_link = ('https://rabota.ua/zapros/%d0%b2%d0%be%d0%b4%d0%b8%' +
+                         'd1%82%d0%b5%d0%bb%d1%8c/%d1%83%d0%ba%d1%80%d0%b0%d' +
+                         '0%b8%d0%bd%d0%b0/pg2')
+        # Тестируемый метод должен изенять свойство _url на ожидаемое
+        assert test_object._url == expected_link
+        # Присвоение тестового значения свойству _soup тестового объекта
+        test_object._soup = BeautifulSoup('<div></div>', 'lxml')
+        # Выполнение тестируемого метода
+        test_object._pagination()
+        # При отсутствии на странице ссылки на следующую метод должен изменить
+        # значение свойства _url на False
+        assert test_object._url is False
+
+    def test_get_work_ua_data(self):
+        # Тестирование в реальных условиях
+        link = ('https://rabota.ua/zapros/%d1%80%d0%b0%d0%b7%d1%80%d0%b0%d0%' +
+                'b1%d0%be%d1%82%d1%87%d0%b8%d0%ba/%d0%b7%d0%b0%d0%bf%d0%be%d' +
+                '1%80%d0%be%d0%b6%d1%8c%d0%b5')
+        # Получение списка кортежей с вакансиями
+        result_list = RabotaUaParser().set_url(link).get_data()
         # Если парсер отработал - то длинна списка должна быть более 0
         assert len(result_list) > 0
