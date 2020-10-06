@@ -7,11 +7,11 @@ class Parser():
     Класс определяющий общие свойства и методы для всех парсеров
 
     Публичные методы:
-    get_data() - возвращает искомые значения. 
+    get_data() - возвращает искомые значения.
     Метод вызывается ИЗ ЭКЗЕМПЛЯРОВ ПОТОМКОВ данного класса.
     set_ads(ads_list) - устанавливает в свойство _ads_list объекта список с
     кортежами данных, которые, как ожидается получены путем парсинга других
-    сайтов. 
+    сайтов.
     Метод вызывается ИЗ ЭКЗЕМПЛЯРОВ ПОТОМКОВ данного класса.
     '''
 
@@ -215,5 +215,62 @@ class WorkUaParser(Parser):
                 .find('span', class_='glyphicon-chevron-right')
                 .find_parent('li').find('a').get('href')
             )
+        except AttributeError:
+            self._url = False
+
+
+class RabotaUaParser(Parser):
+    '''
+    Класс определяющий методы для парсера сайта rabota.ua
+
+    Имеет единственный публичный метод set_url(), что принимает от
+    пользователя начальное значение url-адреса с которого начинается
+    работа парсера
+    '''
+
+    def set_url(self, url_str):
+        # Если передаваемое значение является ссылкой на hh.ru
+        if url_str[:17] == 'https://rabota.ua':
+            # Записываем его в соответствующее свойство объекта
+            self._url = url_str
+
+            return self
+
+    def _get_details(self):
+        '''Добавляет к списку с объявлениями новые кортежи'''
+        # Находит все контейнеры с объявлениями в текущем массиве данных
+        ads = self._soup.find('table', class_='f-vacancylist-tablewrap'
+                              ).find_all('div', class_='card-body')
+        # Находит интересующие нас данные в каждом контейнере
+        for ad in ads:
+            # Заголовок объявления
+            title = ad.find('a', class_='ga_listing').get('title')
+            # Ссылка на страницу объявления
+            link = ('https://rabota.ua' +
+                    ad.find('a', class_='ga_listing').get('href'))
+            # Наименование работодателя
+            try:
+                employeer = ad.find(
+                    'a', class_='company-profile-name').get('title')
+            except AttributeError:
+                employeer = 'не указан'
+
+            # Размер заработной платы
+            salary = ad.find('span', class_='salary').text.replace('\xa0', '')
+            if salary == '':
+                salary = 'не указана'
+            # Запись полученых данных в кортеж
+            ad_data = (title, employeer, link, salary)
+            # Проверка записи на уникальность и запись в результирующий список
+            self._checklist(ad_data)
+
+    def _pagination(self):
+        '''Изменяет ссылку на следующую страницу. Изменяет её на False, если
+        следующей страницы нет'''
+        # Получение ссылки на следующую странцицу
+        try:
+            self._url = 'https://rabota.ua' + self._soup.find(
+                'dd', class_='nextbtn').find('a').get('href').strip()
+        # Если таковой нет, то указываем это
         except AttributeError:
             self._url = False
