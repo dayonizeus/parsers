@@ -1,4 +1,4 @@
-W_PARSER 0.2.0
+W_PARSER 0.3.0
 ========
 Данная библиотека предоставляет классы для парсинга русскоязычных сайтов с объявлениями о работе
 
@@ -7,6 +7,7 @@ W_PARSER 0.2.0
 - hh.ru - класс HhParser()
 - work.ua - класс WorkUaParser()
 - rabota.ua - класс RabotaUaParser()
+- superjob.ru - класс SuperjobParser()
 
 ## Установка
 

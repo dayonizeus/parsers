@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "w_parser"
-version = "0.2.0"
+version = "0.3.0"
 description = "Parser for job search sites"
 authors = ["dayonizeus <dayonizeus@gmail.com>"]
 license = "MIT"
