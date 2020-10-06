@@ -274,3 +274,59 @@ class RabotaUaParser(Parser):
         # Если таковой нет, то указываем это
         except AttributeError:
             self._url = False
+
+
+class SuperjobParser(Parser):
+    '''
+    Класс определяющий методы для парсера сайта superjob.ru
+
+    Имеет единственный публичный метод set_url(), что принимает от
+    пользователя начальное значение url-адреса с которого начинается
+    работа парсера
+    '''
+
+    def set_url(self, url_str):
+        ''' Устанавливает стартовую ссылку для парсинга '''
+        # Если передаваемое значение является ссылкой на superjob.ru
+        if 'superjob.ru' in url_str and url_str[:8] == 'https://':
+            # Записываем его в соответствующее свойство объекта
+            self._url = url_str
+
+            return self
+
+    def _get_details(self):
+        '''Добавляет к списку с объявлениями новые кортежи'''
+        # Находит все контейнеры с объявлениями в текущем массиве данных
+        ads = self._soup.find_all('div', class_='f-test-vacancy-item')
+        # Находит интересующие нас данные в каждом контейнере
+        for ad in ads:
+            # Заголовок объявления
+            title = ad.find('a', class_='_6AfZ9').text
+            # Ссылка на страницу объявления
+            link = ("https://www.superjob.ru" +
+                    ad.find('a', class_='_6AfZ9').get('href'))
+            # Наименование работодателя
+            try:
+                emp_class = 'f-test-text-vacancy-item-company-name'
+                employeer = ad.find('span', class_=emp_class).text.strip()
+            except AttributeError:
+                employeer = 'не указан'
+            # Размер заработной платы
+            sal_class = 'f-test-text-company-item-salary'
+            salary = ad.find('span', class_=sal_class).text.strip()
+            salary = salary.replace('\u202f', ' ')
+            salary = salary.replace('\xa0', ' ')
+            # Запись полученых данных в кортеж
+            ad_data = (title, employeer, link, salary)
+            # Проверка записи на уникальность и запись в результирующий список
+            self._checklist(ad_data)
+
+    def _pagination(self):
+        '''Изменяет ссылку на следующую страницу. Изменяет её на False, если
+        следующей страницы нет'''
+        # Получение ссылки на следующую странцицу
+        is_next = self._soup.find('a', rel='next')
+        if is_next:
+            self._url = f"https://www.superjob.ru{is_next.get('href')}"
+        else:
+            self._url = False
