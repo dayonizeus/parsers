@@ -6,6 +6,7 @@ W_PARSER
 
 - hh.ru - класс HhParser()
 - work.ua - класс WorkUaParser()
+- rabota.ua - класс RabotaUaParser()
 
 ## Установка
 
